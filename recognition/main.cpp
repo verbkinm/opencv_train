@@ -53,13 +53,19 @@ int main()
             model1->predict(face_resize, label, confidence1);
             model2->predict(face_resize, label, confidence2);
 
-            // draw a rectangle on the image
-            rectangle(frame, face, Scalar(255, 0, 0), 2);
-
             // display recognition result
-            std::string labelText = "Unknown" ;
+            std::string labelText;
             if (confidence1 < 41.0 /*&& confidence2 > 4000*/) // Set a threshold to judge the recognition result
+            {
                 labelText = "Mikhail";
+                // draw a rectangle on the image
+                rectangle(frame, face, Scalar(0, 255, 0), 2);
+            }
+            else
+            {
+                labelText = "Unknown";
+                rectangle(frame, face, Scalar(0, 0, 255), 2);
+            }
 
             std::string labelTextLBPH = "LBPH: " + std::to_string((int)confidence1);
             std::string labelTextEigen = "Eigen: " + std::to_string((int)confidence2);

@@ -34,7 +34,7 @@ int resize_save(Mat& faceIn, char* path, int  faceseq)
     {
         resize(faceIn, faceOut, Size(256, 256));
         cvtColor(faceOut, faceOut, COLOR_BGR2GRAY); //Transform frame as the gradation picture, note imshow is still the original frame.
-        equalizeHist(faceOut, faceOut); //Histogram equalization, which is helpful to improve the quality of pictures.
+//        equalizeHist(faceOut, faceOut); //Histogram equalization, which is helpful to improve the quality of pictures.
 
         //Resize and Keep a match with the train database.
         strname = format("%s/%d.pgm", path, faceseq); //mkdir
