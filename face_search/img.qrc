@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>img/open.png</file>
+        <file>img/save.png</file>
+        <file>img/exit.png</file>
+        <file>img/mir_v.png</file>
+        <file>img/mir_h.png</file>
+        <file>img/plus.png</file>
+        <file>img/minus.png</file>
+        <file>img/rotate_1.png</file>
+        <file>img/rotate_0.png</file>
+    </qresource>
+</RCC>
