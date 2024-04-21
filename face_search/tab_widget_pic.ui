@@ -62,11 +62,14 @@
           <height>40</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Открыть изображение</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/open.png</normaloff>:/img/open.png</iconset>
         </property>
         <property name="iconSize">
@@ -94,11 +97,14 @@
           <height>40</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Созранить изображение</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/save.png</normaloff>:/img/save.png</iconset>
         </property>
         <property name="iconSize">
@@ -139,11 +145,14 @@
           <height>40</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Повернуть на 45°</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/rotate_0.png</normaloff>:/img/rotate_0.png</iconset>
         </property>
         <property name="iconSize">
@@ -202,11 +211,14 @@
           <height>40</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Повернуть на -45°</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/rotate_1.png</normaloff>:/img/rotate_1.png</iconset>
         </property>
         <property name="iconSize">
@@ -234,11 +246,14 @@
           <height>40</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Зеркальное отображение по горизонтали</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/mir_h.png</normaloff>:/img/mir_h.png</iconset>
         </property>
         <property name="iconSize">
@@ -266,11 +281,14 @@
           <height>40</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Зеркальное отображение по вертикали</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/mir_v.png</normaloff>:/img/mir_v.png</iconset>
         </property>
         <property name="iconSize">
@@ -292,11 +310,14 @@
           <height>40</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Увеличить</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/plus.png</normaloff>:/img/plus.png</iconset>
         </property>
         <property name="iconSize">
@@ -330,11 +351,14 @@
           <height>0</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Уменьшить</string>
+        </property>
         <property name="text">
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="img.qrc">
+         <iconset>
           <normaloff>:/img/minus.png</normaloff>:/img/minus.png</iconset>
         </property>
         <property name="iconSize">
@@ -357,8 +381,6 @@
    <header>../../../../graphicsview.h</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="img.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

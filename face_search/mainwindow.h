@@ -18,6 +18,10 @@ public:
 private slots:
     void on_action_triggered();
 
+    void on_detect_clicked();
+
+    void slotMouseMove(QPointF point);
+
 private:
     Ui::MainWindow *ui;
 };

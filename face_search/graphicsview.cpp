@@ -4,18 +4,24 @@
 
 GraphicsView::GraphicsView(QWidget *parent) : QGraphicsView(parent)
 {
+    setMouseTracking(true);
 }
 
 void GraphicsView::mirrorH()
 {
     for (QGraphicsItem *item : items())
     {
-        if (item->transform().m22() == 1)
-            item->moveBy(0, item->boundingRect().height());
-        else
-            item->moveBy(0, -item->boundingRect().height());
+        //        if (item->transform().m22() == 1)
+        //            item->moveBy(0, item->boundingRect().height());
+        //        else
+        //            item->moveBy(0, -item->boundingRect().height());
 
-        item->setTransform(item->transform().scale(1, -1));
+        QGraphicsPixmapItem *imageLabel = dynamic_cast<QGraphicsPixmapItem *>(item);
+        if (imageLabel == nullptr)
+            continue;
+
+        imageLabel->setPixmap(imageLabel->pixmap().transformed(QTransform().scale(1, -1)));
+//        item->setTransform(item->transform().scale(1, -1));
     }
 }
 
@@ -23,12 +29,16 @@ void GraphicsView::mirrorV()
 {
     for (QGraphicsItem *item : items())
     {
-        if (item->transform().m11() == 1)
-            item->moveBy(item->boundingRect().width(), 0);
-        else
-            item->moveBy(-item->boundingRect().width(), 0);
+        //        if (item->transform().m11() == 1)
+        //            item->moveBy(item->boundingRect().width(), 0);
+        //        else
+        //            item->moveBy(-item->boundingRect().width(), 0);
 
-        item->setTransform(item->transform().scale(-1, 1));
+        QGraphicsPixmapItem *imageLabel = dynamic_cast<QGraphicsPixmapItem *>(item);
+        if (imageLabel == nullptr)
+            continue;
+        imageLabel->setPixmap(imageLabel->pixmap().transformed(QTransform().scale(-1, 1)));
+//        item->setTransform(item->transform().scale(-1, 1));
     }
 }
 
@@ -45,15 +55,28 @@ void GraphicsView::setAngle(qreal angle)
         qreal y = item->boundingRect().height() / 2;
 
         item->setTransform(QTransform().translate(x, y).rotate(angle).translate(-x, -y));
-//        item->setRotation(angle);
+        //        item->setRotation(angle);
     }
+}
+
+QTransform GraphicsView::getTransformItem(qsizetype index)
+{
+    if (items().size() <= index)
+        return {};
+
+    return items().at(index)->transform();
 }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent *event)
 {
-    QPointF subPointF = _mousePressPoint - event->position();
-    horizontalScrollBar()->setValue(_scroolH + subPointF.x());
-    verticalScrollBar()->setValue(_scroolV + subPointF.y());
+    if (event->buttons() == Qt::LeftButton)
+    {
+        QPointF subPointF = _mousePressPoint - event->position();
+        horizontalScrollBar()->setValue(_scroolH + subPointF.x());
+        verticalScrollBar()->setValue(_scroolV + subPointF.y());
+    }
+
+    emit signalMouseMove(event->position());
 }
 
 void GraphicsView::mousePressEvent(QMouseEvent *event)

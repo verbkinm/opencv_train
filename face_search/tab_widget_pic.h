@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QGraphicsScene>
+#include "Converter_Qt_Opencv.h"
 
 namespace Ui {
 class Tab_Widget_Pic;
@@ -16,7 +17,8 @@ public:
     explicit Tab_Widget_Pic(QWidget *parent = nullptr);
     ~Tab_Widget_Pic();
 
-    void setPixmap(const QPixmap &pix);
+//    void setPixmap(const QPixmap &pix);
+    void detect(DETECT_TYPE type);
 
 private slots:
     void on_pic_open_clicked();
@@ -34,12 +36,22 @@ private slots:
     void on_rotate_plus45_clicked();
     void on_rotate_minus45_clicked();
 
+    void on_save_clicked();
+
+signals:
+    void signalMouseMove(QPointF point);
+
 private:
     void setPixmapToPixmapItem(const QPixmap &pix, qsizetype index = 0);
     Ui::Tab_Widget_Pic *ui;
 
     QGraphicsScene *_scene;
-    QPixmap *_pixmap;
+    QGraphicsPixmapItem *_pixmapItem;
+
+    QString _lastPath;
+//    QPixmap *_origin_pixmap;
+//    QImage *_img;
+//    cv::Mat _mat;
 
     // QWidget interface
 protected:

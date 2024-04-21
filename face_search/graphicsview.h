@@ -17,6 +17,7 @@ public:
 
     void zoom(float val);
     void setAngle(qreal angle);
+    QTransform getTransformItem(qsizetype index);
 
 private:
     QPointF _mousePressPoint;
@@ -33,6 +34,7 @@ protected:
 
 signals:
     void signalDoubleClick();
+    void signalMouseMove(QPointF point);
 };
 
 #endif // GRAPHICSVIEW_H

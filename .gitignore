@@ -32,3 +32,11 @@
 *.app
 
 CMakeLists.txt.user
+*/build/*
+.cmake
+CMakeFiles
+.qt
+.qtc
+*CMakeCache.txt
+*.ninja
+*.cmake
