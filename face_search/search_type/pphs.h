@@ -48,6 +48,7 @@ public:
     PPHS& operator=(const PPHS&) = delete;
 
     int detect(cv::Mat &img, bool fps = false);
+    void setModelPath(const std::string &modelPath);
 };
 
 

@@ -3,6 +3,7 @@
 
 #include <QFileDialog>
 
+#include "search_type/pphs.h"
 #include "search_type/search_type_cascadeclassifier.h"
 #include "search_type/yolox.h"
 #include "search_type/yunet.h"
@@ -89,6 +90,19 @@ void MainWindow::on_modelPathSelect_clicked()
         _lastPath = info.path();
 
         YoloX &instance = YoloX::getInstance();
+        instance.setModelPath(fileName.toStdString());
+    }
+    else if (ui->detectionType->currentIndex() == static_cast<int>(DETECT_TYPE::PPHS))
+    {
+        QString fileName = QFileDialog::getOpenFileName(this, tr("Open model"), _lastPath, tr("onnx Files (*.onnx)"));
+
+        if (fileName.isEmpty())
+            return;
+
+        QFileInfo info(fileName);
+        _lastPath = info.path();
+
+        PPHS &instance = PPHS::getInstance();
         instance.setModelPath(fileName.toStdString());
     }
 }

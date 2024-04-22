@@ -41,6 +41,11 @@ int PPHS::detect(Mat &img, bool fps)
     return -1;
 }
 
+void PPHS::setModelPath(const string &modelPath)
+{
+    this->model = readNet(modelPath);
+}
+
 Mat PPHS::preprocess(const Mat image)
 {
     this->currentSize = image.size();
