@@ -22,7 +22,11 @@ private slots:
 
     void slotMouseMove(QPointF point);
 
+    void on_modelPathSelect_clicked();
+
 private:
     Ui::MainWindow *ui;
+
+    QString _lastPath;
 };
 #endif // MAINWINDOW_H

@@ -1,24 +1,80 @@
 #include "yunet.h"
+#include <fstream>
+
+YuNet *YuNet::instance = nullptr;
 
 YuNet::YuNet(const std::string &model_path, const cv::Size &input_size, float conf_threshold, float nms_threshold, int top_k, int backend_id, int target_id)
     : model_path_(model_path), input_size_(input_size),
     conf_threshold_(conf_threshold), nms_threshold_(nms_threshold),
-    top_k_(top_k), backend_id_(backend_id), target_id_(target_id)
+    top_k_(top_k), backend_id_(backend_id), target_id_(target_id),
+    _loadState(false)
 {
-    model = cv::FaceDetectorYN::create(model_path_, "", input_size_, conf_threshold_, nms_threshold_, top_k_, backend_id_, target_id_);
+    std::ifstream file(model_path_);
+    if (file.is_open())
+    {
+        model = cv::FaceDetectorYN::create(model_path_, "", input_size_, conf_threshold_, nms_threshold_, top_k_, backend_id_, target_id_);
+        std::cout << "Load " << model_path_ << " succeed." << std::endl;
+        _loadState = true;
+    }
+    else
+        std::cerr << "Load " << model_path_ << " failed." << std::endl;
+}
+
+YuNet &YuNet::getInstance()
+{
+    if (!instance)
+        instance = new YuNet("face_detection_yunet_2023mar.onnx", cv::Size());
+
+    return *instance;
+}
+
+void YuNet::setModelPath(const std::string modelPath)
+{
+    try
+    {
+        model_path_ = modelPath;
+        model = cv::FaceDetectorYN::create(model_path_, "", input_size_, conf_threshold_, nms_threshold_, top_k_, backend_id_, target_id_);
+        std::cout << "Load " << model_path_ << " succeed." << std::endl;
+        _loadState = true;
+    }
+    catch(...)
+    {
+        std::cerr << "Load " << model_path_ << " failed." << std::endl;
+        _loadState = false;
+    }
 }
 
 void YuNet::setInputSize(const cv::Size &input_size)
 {
+    if (_loadState == false)
+    {
+        std::cerr << "Load " << model_path_ << " failed." << std::endl;
+        return;
+    }
+
     input_size_ = input_size;
     model->setInputSize(input_size_);
 }
 
-cv::Mat YuNet::detect(const cv::Mat image)
+int YuNet::detect(cv::Mat &image)
 {
+    if (_loadState == false)
+    {
+        std::cerr << "Load " << model_path_ << " failed." << std::endl;
+        return {};
+    }
+
+    setInputSize({image.cols, image.rows});
     cv::Mat res;
     model->detect(image, res);
-    return res;
+
+    if (res.rows) // res.rows
+    {
+        image = visualize(image, res);
+        return res.rows;
+    }
+
+    return 0;
 }
 
 cv::Mat YuNet::visualize(const cv::Mat &image, const cv::Mat &faces, float fps)

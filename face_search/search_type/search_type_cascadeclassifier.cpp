@@ -2,23 +2,33 @@
 
 #include <iostream>
 
+Search_Type_CascadeClassifier *Search_Type_CascadeClassifier::instance = nullptr;
+
 Search_Type_CascadeClassifier::Search_Type_CascadeClassifier() : _loadState(false),
     _xml("haarcascade_frontalface_alt2.xml")
 {
-    loadXml(_xml);
+    setModelPath(_xml);
 }
 
-void Search_Type_CascadeClassifier::loadXml(const std::string &xml)
+Search_Type_CascadeClassifier &Search_Type_CascadeClassifier::getInstance()
 {
-    _xml = xml;
-    if(!_face_cascade.load(xml))
+    if (!instance) {
+        instance = new Search_Type_CascadeClassifier;
+    }
+    return *instance;
+}
+
+void Search_Type_CascadeClassifier::setModelPath(const std::string &modelPath)
+{
+    _xml = modelPath;
+    if(!_cascadeClassifier.load(modelPath))
     {
-        std::cerr << "Load xml failed." << std::endl;
+        std::cerr << "Load " << modelPath << " failed." << std::endl;
         _loadState = false;
         return;
     }
 
-    std::cout << "Load xml succeed." << std::endl;
+    std::cout << "Load " << modelPath << " succeed." << std::endl;
     _loadState = true;
 }
 
@@ -43,7 +53,7 @@ int Search_Type_CascadeClassifier::detect(cv::Mat &img)
     cv::cvtColor(img, img_gary, cv::COLOR_BGR2GRAY);
     cv::equalizeHist(img_gary, img_gary);
 
-    _face_cascade.detectMultiScale(img_gary, objects, 1.1, 3, 0, cv::Size(50, 50));
+    _cascadeClassifier.detectMultiScale(img_gary, objects, 1.1, 3, 0, cv::Size(50, 50));
 
     for(size_t i = 0; i < objects.size(); i++)
         cv::rectangle(img, objects[i], cv::Scalar(0, 255, 0), 10);

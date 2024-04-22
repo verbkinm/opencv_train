@@ -8,13 +8,14 @@
 
 #include "search_type/search_type_cascadeclassifier.h"
 #include "search_type/yunet.h"
+#include "search_type/yolox.h"
 
 Tab_Widget_Pic::Tab_Widget_Pic(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Tab_Widget_Pic),
     _scene(new QGraphicsScene(this)),
     _pixmapItem(new QGraphicsPixmapItem),
-    _lastPath(QDir::homePath())
+    _lastPath(QDir::currentPath())
 {
     ui->setupUi(this);
     ui->angle->setWrapping(true);
@@ -41,41 +42,37 @@ void Tab_Widget_Pic::detect(DETECT_TYPE type)
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    QImage img = tansformOriginalImage();
-    cv::Mat mat = QImageToCvMat(img);
-
-    if (type == DETECT_TYPE::CASCADECLASSIFIER)
+    try
     {
-        Search_Type_CascadeClassifier model;
-        int faces = model.detect(mat);
-        if (faces)
-            newWindowWithDetecetObj(mat, faces);
-    }
-    else if (type == DETECT_TYPE::FaceDetectorYN)
-    {
-        YuNet model("face_detection_yunet_2023mar.onnx", cv::Size(img.width(), img.height()));
-        auto faces = model.detect(mat);
+        QImage img = tansformOriginalImage();
+        cv::Mat mat = QImageToCvMat(img);
 
-        // Print faces
-        std::cout << cv::format("%d faces detected:\n", faces.rows) << std::endl;
-        for (int i = 0; i < faces.rows; ++i)
+        if (type == DETECT_TYPE::CASCADECLASSIFIER)
         {
-            int x1 = static_cast<int>(faces.at<float>(i, 0));
-            int y1 = static_cast<int>(faces.at<float>(i, 1));
-            int w = static_cast<int>(faces.at<float>(i, 2));
-            int h = static_cast<int>(faces.at<float>(i, 3));
-            float conf = faces.at<float>(i, 14);
-            std::cout << cv::format("%d: x1=%d, y1=%d, w=%d, h=%d, conf=%.4f\n", i, x1, y1, w, h, conf);
+            Search_Type_CascadeClassifier &model = Search_Type_CascadeClassifier::getInstance();
+            int faces = model.detect(mat);
+            if (faces)
+                newWindowWithDetecetObj(mat, faces);
         }
-
-        if (faces.rows)
+        else if (type == DETECT_TYPE::FACEDETECTORYN)
         {
-            // Draw reults on the input image
-            auto res_image = model.visualize(mat, faces);
+            YuNet &model = YuNet::getInstance();
+            int faces = model.detect(mat);
 
-            newWindowWithDetecetObj(res_image, faces.rows);
+            if (faces)
+                newWindowWithDetecetObj(mat, faces);
+        }
+        else if (type == DETECT_TYPE::YOLOX)
+        {
+            YoloX &model = YoloX::getInstance();
+
+            int objs = model.detect(mat);
+
+            if (objs)
+                newWindowWithDetecetObj(mat, objs);
         }
     }
+    catch(...){}
 
     QApplication::restoreOverrideCursor();
 }

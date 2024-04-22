@@ -7,7 +7,8 @@
 
 enum class DETECT_TYPE {
     CASCADECLASSIFIER,
-    FaceDetectorYN,
+    FACEDETECTORYN,
+    YOLOX,
     NONE
 };
 

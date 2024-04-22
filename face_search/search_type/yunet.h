@@ -2,14 +2,20 @@
 #define YUNET_H
 
 #include "opencv2/opencv.hpp"
-#include <map>
-#include <vector>
-#include <string>
-#include <iostream>
 
 class YuNet
 {
 public:
+    static YuNet &getInstance();
+
+    void setModelPath(const std::string modelPath);
+    void setInputSize(const cv::Size& input_size);
+    int detect(cv::Mat &image);
+
+    YuNet(const YuNet&) = delete;
+    YuNet& operator=(const YuNet&) = delete;
+
+private:
     YuNet(const std::string& model_path,
           const cv::Size& input_size = cv::Size(320, 320),
           float conf_threshold = 0.6f,
@@ -18,11 +24,8 @@ public:
           int backend_id = 0,
           int target_id = 0);
 
-    void setInputSize(const cv::Size& input_size);
-    cv::Mat detect(const cv::Mat image);
     cv::Mat visualize(const cv::Mat& image, const cv::Mat& faces, float fps = -1.f);
 
-private:
     cv::Ptr<cv::FaceDetectorYN> model;
 
     std::string model_path_;
@@ -32,6 +35,10 @@ private:
     int top_k_;
     int backend_id_;
     int target_id_;
+
+    bool _loadState;
+
+     static YuNet *instance;
 };
 
 #endif // YUNET_H
