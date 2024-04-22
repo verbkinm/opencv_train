@@ -11,6 +11,7 @@
 #include "search_type/search_type_cascadeclassifier.h"
 #include "search_type/yunet.h"
 #include "search_type/yolox.h"
+#include "search_type/pphs.h"
 
 Tab_Widget_Cam::Tab_Widget_Cam(QWidget *parent) :
     QWidget(parent),
@@ -150,6 +151,12 @@ void Tab_Widget_Cam::detecting(QImage &img)
         {
             YoloX &model = YoloX::getInstance();
             model.detect(mat, true);
+            img = cvMatToQImage(mat);
+        }
+        else if (_detectType == DETECT_TYPE::PPHS)
+        {
+            PPHS &model = PPHS::getInstance();
+            model.detect(mat);
             img = cvMatToQImage(mat);
         }
     }

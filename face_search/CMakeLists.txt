@@ -32,8 +32,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         tab_widget_cam.h tab_widget_cam.cpp tab_widget_cam.ui
         search_type/search_type_cascadeclassifier.h search_type/search_type_cascadeclassifier.cpp
         search_type/yunet.h search_type/yunet.cpp
-        Converter_Qt_Opencv.h Converter_Qt_Opencv.cpp
         search_type/yolox.h search_type/yolox.cpp
+        search_type/pphs.h search_type/pphs.cpp
+        Converter_Qt_Opencv.h Converter_Qt_Opencv.cpp
     )
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET face_search APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR

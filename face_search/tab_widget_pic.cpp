@@ -10,6 +10,7 @@
 #include "search_type/search_type_cascadeclassifier.h"
 #include "search_type/yunet.h"
 #include "search_type/yolox.h"
+#include "search_type/pphs.h"
 
 Tab_Widget_Pic::Tab_Widget_Pic(QWidget *parent) :
     QWidget(parent),
@@ -81,6 +82,15 @@ void Tab_Widget_Pic::detect(DETECT_TYPE type)
 
             if (objs)
                 newWindowWithDetecetObj(mat, objs);
+        }
+        else if (type == DETECT_TYPE::PPHS)
+        {
+            objs = -1;
+
+            PPHS &model = PPHS::getInstance();
+            model.detect(mat);
+
+            newWindowWithDetecetObj(mat, objs);
         }
     }
     catch(...){}
