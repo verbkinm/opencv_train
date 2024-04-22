@@ -32,7 +32,7 @@ void Search_Type_CascadeClassifier::setModelPath(const std::string &modelPath)
     _loadState = true;
 }
 
-int Search_Type_CascadeClassifier::detect(cv::Mat &img)
+int Search_Type_CascadeClassifier::detect(cv::Mat &img, bool fps)
 {
     if (img.empty())
     {
@@ -53,7 +53,15 @@ int Search_Type_CascadeClassifier::detect(cv::Mat &img)
     cv::cvtColor(img, img_gary, cv::COLOR_BGR2GRAY);
     cv::equalizeHist(img_gary, img_gary);
 
+
+    auto tick_meter = cv::TickMeter();
+    tick_meter.start();
     _cascadeClassifier.detectMultiScale(img_gary, objects, 1.1, 3, 0, cv::Size(50, 50));
+    tick_meter.stop();
+
+    if (fps)
+        putText(img, cv::format("FPS: %.2f", (float)tick_meter.getFPS()), cv::Size(10, 25), cv::FONT_HERSHEY_SIMPLEX, 1, cv::Scalar(0, 0, 255), 2);
+
 
     for(size_t i = 0; i < objects.size(); i++)
         cv::rectangle(img, objects[i], cv::Scalar(0, 255, 0), 10);

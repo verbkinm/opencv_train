@@ -11,6 +11,12 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    enum TAB_NAME {
+        TAB_PICTURE,
+        TAB_VIDEO,
+        TAB_CAMERA
+    };
+
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -23,6 +29,12 @@ private slots:
     void slotMouseMove(QPointF point);
 
     void on_modelPathSelect_clicked();
+
+    void slotCameraScreenShoot(QImage img);
+
+    void slotTabChange(int index);
+
+    void on_detect_toggled(bool checked);
 
 private:
     Ui::MainWindow *ui;

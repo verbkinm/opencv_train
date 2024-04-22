@@ -17,6 +17,8 @@ public:
     explicit Tab_Widget_Pic(QWidget *parent = nullptr);
     ~Tab_Widget_Pic();
 
+    void setImage(const QImage &img);
+
     void detect(DETECT_TYPE type);
 
 private slots:

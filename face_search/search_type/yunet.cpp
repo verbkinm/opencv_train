@@ -28,7 +28,7 @@ YuNet &YuNet::getInstance()
     return *instance;
 }
 
-void YuNet::setModelPath(const std::string modelPath)
+void YuNet::setModelPath(const std::string &modelPath)
 {
     try
     {
@@ -56,7 +56,7 @@ void YuNet::setInputSize(const cv::Size &input_size)
     model->setInputSize(input_size_);
 }
 
-int YuNet::detect(cv::Mat &image)
+int YuNet::detect(cv::Mat &image, bool fps)
 {
     if (_loadState == false)
     {
@@ -66,11 +66,19 @@ int YuNet::detect(cv::Mat &image)
 
     setInputSize({image.cols, image.rows});
     cv::Mat res;
+
+    auto tick_meter = cv::TickMeter();
+    tick_meter.start();
     model->detect(image, res);
+    tick_meter.stop();
 
     if (res.rows) // res.rows
     {
-        image = visualize(image, res);
+        if (fps)
+            image = visualize(image, res, (float)tick_meter.getFPS());
+        else
+            image = visualize(image, res);
+
         return res.rows;
     }
 

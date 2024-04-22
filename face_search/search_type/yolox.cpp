@@ -39,7 +39,7 @@ YoloX::YoloX(string modPath, float confThresh, float nmsThresh, float objThresh,
     this->generateAnchors();
 }
 
-int YoloX::detect(Mat &img)
+int YoloX::detect(Mat &img, bool fps)
 {
     Mat inputBlob;
     double letterboxScale;
@@ -54,10 +54,18 @@ int YoloX::detect(Mat &img)
     pair<Mat, double> w = letterBox(img);//, cv::Size(img.width(), img.height()));
     inputBlob = get<0>(w);
     letterboxScale  = get<1>(w);
-    Mat predictions = infer(inputBlob);
-    img = visualize(predictions, img, letterboxScale, 0);
 
-    return 1;
+    auto tick_meter = cv::TickMeter();
+    tick_meter.start();
+    Mat predictions = infer(inputBlob);
+    tick_meter.stop();
+
+    if (fps)
+        img = visualize(predictions, img, letterboxScale, (float)tick_meter.getFPS());
+    else
+        img = visualize(predictions, img, letterboxScale);
+
+    return predictions.rows;
 }
 
 YoloX &YoloX::getInstance()
@@ -66,6 +74,11 @@ YoloX &YoloX::getInstance()
         instance = new YoloX("object_detection_yolox_2022nov.onnx");
     }
     return *instance;
+}
+
+void YoloX::setModelPath(const string &modelPath)
+{
+    net = readNet(modelPath);
 }
 
 Mat YoloX::preprocess(Mat img)

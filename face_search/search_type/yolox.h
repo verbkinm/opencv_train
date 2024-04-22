@@ -38,11 +38,12 @@ private:
 
 public:
     static YoloX &getInstance();
+    void setModelPath(const std::string &modelPath);
 
     YoloX(const YoloX&) = delete;
     YoloX& operator=(const YoloX&) = delete;
 
-    int detect(cv::Mat &img);
+    int detect(cv::Mat &img, bool fps = false);
 };
 
 #endif // YOLOX_H

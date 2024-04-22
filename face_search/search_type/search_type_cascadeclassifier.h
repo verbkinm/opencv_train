@@ -12,7 +12,7 @@ public:
     static Search_Type_CascadeClassifier &getInstance();
 
     void setModelPath(const std::string &modelPath);
-    int detect(cv::Mat &img);
+    int detect(cv::Mat &img, bool fps = false);
 
     Search_Type_CascadeClassifier(const Search_Type_CascadeClassifier&) = delete;
     Search_Type_CascadeClassifier& operator=(const Search_Type_CascadeClassifier&) = delete;

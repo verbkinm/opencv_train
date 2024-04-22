@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <QImageReader>
 #include <QBuffer>
+#include <QMessageBox>
 
 #include "search_type/search_type_cascadeclassifier.h"
 #include "search_type/yunet.h"
@@ -38,9 +39,19 @@ Tab_Widget_Pic::~Tab_Widget_Pic()
     //    delete _pixmapItem;
 }
 
+void Tab_Widget_Pic::setImage(const QImage &img)
+{
+    _img = img;
+    slotViewTransformedImage();
+    endablePanelButtons(true);
+    slotAdjustSize();
+}
+
 void Tab_Widget_Pic::detect(DETECT_TYPE type)
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
+
+    int objs = 0;
 
     try
     {
@@ -50,23 +61,23 @@ void Tab_Widget_Pic::detect(DETECT_TYPE type)
         if (type == DETECT_TYPE::CASCADECLASSIFIER)
         {
             Search_Type_CascadeClassifier &model = Search_Type_CascadeClassifier::getInstance();
-            int faces = model.detect(mat);
-            if (faces)
-                newWindowWithDetecetObj(mat, faces);
+            objs = model.detect(mat);
+            if (objs)
+                newWindowWithDetecetObj(mat, objs);
         }
         else if (type == DETECT_TYPE::FACEDETECTORYN)
         {
             YuNet &model = YuNet::getInstance();
-            int faces = model.detect(mat);
+            objs = model.detect(mat);
 
-            if (faces)
-                newWindowWithDetecetObj(mat, faces);
+            if (objs)
+                newWindowWithDetecetObj(mat, objs);
         }
         else if (type == DETECT_TYPE::YOLOX)
         {
             YoloX &model = YoloX::getInstance();
 
-            int objs = model.detect(mat);
+            objs = model.detect(mat);
 
             if (objs)
                 newWindowWithDetecetObj(mat, objs);
@@ -75,6 +86,13 @@ void Tab_Widget_Pic::detect(DETECT_TYPE type)
     catch(...){}
 
     QApplication::restoreOverrideCursor();
+
+    if (objs == 0)
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Не найдено ни одного объекта.");
+        msgBox.exec();
+    }
 }
 
 void Tab_Widget_Pic::on_open_clicked()
@@ -85,12 +103,8 @@ void Tab_Widget_Pic::on_open_clicked()
 
     if (!fileName.isEmpty())
     {
-        _img.load(fileName);
-        slotViewTransformedImage();
-
-        endablePanelButtons(true);
-
-        slotAdjustSize();
+        QImage img(fileName);
+        setImage(img);
     }
 }
 

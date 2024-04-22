@@ -8,9 +8,9 @@ class YuNet
 public:
     static YuNet &getInstance();
 
-    void setModelPath(const std::string modelPath);
+    void setModelPath(const std::string &modelPath);
     void setInputSize(const cv::Size& input_size);
-    int detect(cv::Mat &image);
+    int detect(cv::Mat &image, bool fps = false);
 
     YuNet(const YuNet&) = delete;
     YuNet& operator=(const YuNet&) = delete;

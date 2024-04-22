@@ -9,5 +9,8 @@
         <file>img/minus.png</file>
         <file>img/rotate_1.png</file>
         <file>img/rotate_0.png</file>
+        <file>img/stop.png</file>
+        <file>img/play.png</file>
+        <file>img/camera.png</file>
     </qresource>
 </RCC>
