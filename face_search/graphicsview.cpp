@@ -37,6 +37,7 @@ void GraphicsView::mirrorV()
         QGraphicsPixmapItem *imageLabel = dynamic_cast<QGraphicsPixmapItem *>(item);
         if (imageLabel == nullptr)
             continue;
+
         imageLabel->setPixmap(imageLabel->pixmap().transformed(QTransform().scale(-1, 1)));
 //        item->setTransform(item->transform().scale(-1, 1));
     }

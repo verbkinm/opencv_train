@@ -9,9 +9,14 @@
 class Search_Type_CascadeClassifier
 {
 public:
-    Search_Type_CascadeClassifier() = delete;
-    static void loadDefaultXml();
-    static int detect(cv::Mat &img);
+    Search_Type_CascadeClassifier();
+    void loadXml(const std::string &xml);
+    int detect(cv::Mat &img);
+
+private:
+    cv::CascadeClassifier _face_cascade;
+    bool _loadState;
+    std::string _xml;
 };
 
 #endif // SEARCH_TYPE_CASCADECLASSIFIER_H

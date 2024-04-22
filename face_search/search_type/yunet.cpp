@@ -14,7 +14,7 @@ void YuNet::setInputSize(const cv::Size &input_size)
     model->setInputSize(input_size_);
 }
 
-cv::Mat YuNet::infer(const cv::Mat image)
+cv::Mat YuNet::detect(const cv::Mat image)
 {
     cv::Mat res;
     model->detect(image, res);

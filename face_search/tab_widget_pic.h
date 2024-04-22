@@ -17,45 +17,44 @@ public:
     explicit Tab_Widget_Pic(QWidget *parent = nullptr);
     ~Tab_Widget_Pic();
 
-//    void setPixmap(const QPixmap &pix);
     void detect(DETECT_TYPE type);
 
 private slots:
-    void on_pic_open_clicked();
+    void on_open_clicked();
 
     void on_zoomIn_clicked();
     void on_zoomOut_clicked();
 
-    void on_mir_h_clicked();
-    void on_mir_v_clicked();
-
     void slotAdjustSize();
-
-    void on_angle_valueChanged(double val);
 
     void on_rotate_plus45_clicked();
     void on_rotate_minus45_clicked();
 
     void on_save_clicked();
 
+    void slotViewTransformedImage();
+
 signals:
     void signalMouseMove(QPointF point);
 
 private:
-    void setPixmapToPixmapItem(const QPixmap &pix, qsizetype index = 0);
+    QImage tansformOriginalImage();
+    void endablePanelButtons(bool state);
+    void newWindowWithDetecetObj(const cv::Mat &mat, int countObject);
+
+
     Ui::Tab_Widget_Pic *ui;
 
     QGraphicsScene *_scene;
     QGraphicsPixmapItem *_pixmapItem;
 
     QString _lastPath;
-//    QPixmap *_origin_pixmap;
-//    QImage *_img;
+    QImage _img;
 //    cv::Mat _mat;
 
     // QWidget interface
 protected:
-    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void keyPressEvent(QKeyEvent *event) override;
 };
 
 #endif // TAB_WIDGET_PIC_H

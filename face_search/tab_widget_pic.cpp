@@ -4,6 +4,7 @@
 
 #include <QFileDialog>
 #include <QImageReader>
+#include <QBuffer>
 
 #include "search_type/search_type_cascadeclassifier.h"
 #include "search_type/yunet.h"
@@ -19,10 +20,15 @@ Tab_Widget_Pic::Tab_Widget_Pic(QWidget *parent) :
     ui->angle->setWrapping(true);
     ui->view->setScene(_scene);
     _pixmapItem->setTransformationMode(Qt::SmoothTransformation);
+    _pixmapItem->setFlag(QGraphicsItem::ItemIsSelectable);
     _scene->addItem(_pixmapItem);
 
     connect(ui->view, &GraphicsView::signalDoubleClick, this, &Tab_Widget_Pic::slotAdjustSize);
     connect(ui->view, &GraphicsView::signalMouseMove, this, &Tab_Widget_Pic::signalMouseMove);
+
+    connect(ui->mir_h, &QPushButton::clicked, this, &Tab_Widget_Pic::slotViewTransformedImage);
+    connect(ui->mir_v, &QPushButton::clicked, this, &Tab_Widget_Pic::slotViewTransformedImage);
+    connect(ui->angle, &QDoubleSpinBox::valueChanged, this, &Tab_Widget_Pic::slotViewTransformedImage);
 }
 
 Tab_Widget_Pic::~Tab_Widget_Pic()
@@ -31,34 +37,24 @@ Tab_Widget_Pic::~Tab_Widget_Pic()
     //    delete _pixmapItem;
 }
 
-//void Tab_Widget_Pic::setPixmap(const QPixmap &pix)
-//{
-////    _pixmapItem->setPixmap(pix);
-
-////    slotAdjustSize();
-////    qDebug() << _pixmapItem->boundingRect() << _scene->sceneRect();
-//}
-
 void Tab_Widget_Pic::detect(DETECT_TYPE type)
 {
     QApplication::setOverrideCursor(Qt::WaitCursor);
 
-    QPixmap pix = _pixmapItem->pixmap();
-    pix = pix.transformed(_pixmapItem->transform());
-    cv::Mat mat = QPixmapToCvMat(pix);
+    QImage img = tansformOriginalImage();
+    cv::Mat mat = QImageToCvMat(img);
 
     if (type == DETECT_TYPE::CASCADECLASSIFIER)
     {
-        if (Search_Type_CascadeClassifier::detect(mat))
-        {
-            ui->angle->setValue(0);
-            _pixmapItem->setPixmap(cvMatToQPixmap(mat));
-        }
+        Search_Type_CascadeClassifier model;
+        int faces = model.detect(mat);
+        if (faces)
+            newWindowWithDetecetObj(mat, faces);
     }
     else if (type == DETECT_TYPE::FaceDetectorYN)
     {
-        YuNet model("face_detection_yunet_2023mar.onnx", cv::Size(pix.width(), pix.height()));
-        auto faces = model.infer(mat);
+        YuNet model("face_detection_yunet_2023mar.onnx", cv::Size(img.width(), img.height()));
+        auto faces = model.detect(mat);
 
         // Print faces
         std::cout << cv::format("%d faces detected:\n", faces.rows) << std::endl;
@@ -72,17 +68,19 @@ void Tab_Widget_Pic::detect(DETECT_TYPE type)
             std::cout << cv::format("%d: x1=%d, y1=%d, w=%d, h=%d, conf=%.4f\n", i, x1, y1, w, h, conf);
         }
 
-        // Draw reults on the input image
-        auto res_image = model.visualize(mat, faces);
+        if (faces.rows)
+        {
+            // Draw reults on the input image
+            auto res_image = model.visualize(mat, faces);
 
-        ui->angle->setValue(0);
-        _pixmapItem->setPixmap(cvMatToQPixmap(res_image));
+            newWindowWithDetecetObj(res_image, faces.rows);
+        }
     }
 
     QApplication::restoreOverrideCursor();
 }
 
-void Tab_Widget_Pic::on_pic_open_clicked()
+void Tab_Widget_Pic::on_open_clicked()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Image"), _lastPath, tr("Image Files (*.png *.jpg *.bmp)"));
     QFileInfo info(fileName);
@@ -90,25 +88,14 @@ void Tab_Widget_Pic::on_pic_open_clicked()
 
     if (!fileName.isEmpty())
     {
-        QPixmap pix(fileName);
+        _img.load(fileName);
+        slotViewTransformedImage();
 
-        //        setPixmap(pix);
+        endablePanelButtons(true);
 
-        ui->angle->setEnabled(true);
-        ui->save->setEnabled(true);
-        ui->rotate_plus45->setEnabled(true);
-        ui->rotate_minus45->setEnabled(true);
-        ui->mir_h->setEnabled(true);
-        ui->mir_v->setEnabled(true);
-        ui->zoomIn->setEnabled(true);
-        ui->zoomOut->setEnabled(true);
-
-        //        ui->angle->setValue(ui->angle->value());
-        _pixmapItem->setPixmap(pix);
         slotAdjustSize();
     }
 }
-
 
 void Tab_Widget_Pic::on_zoomIn_clicked()
 {
@@ -120,47 +107,65 @@ void Tab_Widget_Pic::on_zoomOut_clicked()
     ui->view->zoom(0.9);
 }
 
-void Tab_Widget_Pic::resizeEvent(QResizeEvent *event)
+void Tab_Widget_Pic::keyPressEvent(QKeyEvent *event)
 {
-}
+    if (event->keyCombination() == QKeyCombination{Qt::ControlModifier, Qt::Key_Q})
+        close();
 
-void Tab_Widget_Pic::on_mir_h_clicked()
-{
-    ui->view->mirrorH();
-}
-
-void Tab_Widget_Pic::on_mir_v_clicked()
-{
-    ui->view->mirrorV();
+    event->accept();
 }
 
 void Tab_Widget_Pic::slotAdjustSize()
 {
     _scene->setSceneRect(_pixmapItem->boundingRect());
     ui->view->fitInView(_pixmapItem, Qt::KeepAspectRatio);
-
-    //!!! Центрирование не становится без следующих строк
-    auto val = ui->angle->value();
-    ui->view->setAngle(val + 1);
-    ui->view->setAngle(val);
 }
 
-void Tab_Widget_Pic::setPixmapToPixmapItem(const QPixmap &pix, qsizetype index)
+QImage Tab_Widget_Pic::tansformOriginalImage()
 {
-    if (ui->view->items().size() <= index)
-        return;
+    QByteArray byteArray;
+    QBuffer buffFile(&byteArray);
+    buffFile.open(QIODevice::ReadWrite);
 
-    auto item = dynamic_cast<QGraphicsPixmapItem *>(ui->view->items().at(index));
-    if (item == nullptr)
-        return;
+    QImage copyImg = _img;
+    QTransform transform;
 
-    //    item->setPixmap(*_pixmap);
+    qreal x = _img.rect().width() / 2;
+    qreal y = _img.rect().height() / 2;
+    copyImg = copyImg.transformed(QTransform().translate(x, y).rotate(ui->angle->value()).translate(-x, -y), Qt::SmoothTransformation);
+    copyImg.mirror(ui->mir_v->isChecked(), ui->mir_h->isChecked());
+
+    copyImg.save(&buffFile, "JPG", 100);
+
+    return copyImg.fromData(byteArray);
 }
 
-
-void Tab_Widget_Pic::on_angle_valueChanged(double val)
+void Tab_Widget_Pic::endablePanelButtons(bool state)
 {
-    ui->view->setAngle(val);
+    ui->open->setEnabled(state);
+    ui->save->setEnabled(state);
+    ui->rotate_minus45->setEnabled(state);
+    ui->rotate_plus45->setEnabled(state);
+    ui->mir_h->setEnabled(state);
+    ui->mir_v->setEnabled(state);
+    ui->angle->setEnabled(state);
+    ui->zoomIn->setEnabled(state);
+    ui->zoomOut->setEnabled(state);
+}
+
+void Tab_Widget_Pic::newWindowWithDetecetObj(const cv::Mat &mat, int countObject)
+{
+    Tab_Widget_Pic *window = new Tab_Widget_Pic;
+    window->setAttribute(Qt::WA_DeleteOnClose);
+    window->setWindowTitle("Detect " + QString::number(countObject) + " object");
+    window->_img = cvMatToQImage(mat);
+    window->show();
+
+    window->endablePanelButtons(true);
+    window->ui->open->setEnabled(false);
+
+    window->slotViewTransformedImage();
+    window->slotAdjustSize();
 }
 
 void Tab_Widget_Pic::on_rotate_plus45_clicked()
@@ -189,7 +194,6 @@ void Tab_Widget_Pic::on_rotate_minus45_clicked()
     ui->angle->setValue(ui->angle->value() - 45);
 }
 
-
 void Tab_Widget_Pic::on_save_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Image"), _lastPath, tr("Image Files (*.png *.jpg *.bmp)"));
@@ -201,10 +205,16 @@ void Tab_Widget_Pic::on_save_clicked()
     fileName = info.path() + "/" + info.completeBaseName() + ".jpg";
     _lastPath = info.path();
 
-    QPixmap pix = _pixmapItem->pixmap();
-    pix = pix.transformed(_pixmapItem->transform());
+    QImage img = tansformOriginalImage();
 
-    pix.save(fileName, "JPG", 100);
+    img.save(fileName, "JPG", 100);
     qDebug() << "Файл " << fileName << " сохранён";
+}
+
+void Tab_Widget_Pic::slotViewTransformedImage()
+{
+    QImage img = tansformOriginalImage();
+    _pixmapItem->setPixmap(QPixmap::fromImage(img));
+    _scene->setSceneRect(img.rect());
 }
 

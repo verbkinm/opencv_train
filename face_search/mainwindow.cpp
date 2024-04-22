@@ -10,8 +10,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     connect(ui->tab_pic, &Tab_Widget_Pic::signalMouseMove, this, &MainWindow::slotMouseMove);
-
-    Search_Type_CascadeClassifier::loadDefaultXml();
 }
 
 MainWindow::~MainWindow()

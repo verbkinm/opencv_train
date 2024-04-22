@@ -19,7 +19,7 @@ public:
           int target_id = 0);
 
     void setInputSize(const cv::Size& input_size);
-    cv::Mat infer(const cv::Mat image);
+    cv::Mat detect(const cv::Mat image);
     cv::Mat visualize(const cv::Mat& image, const cv::Mat& faces, float fps = -1.f);
 
 private:
